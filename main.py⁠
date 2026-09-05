@@ -1,0 +1,30 @@
+import asyncio
+import os
+from aiogram import Bot, Dispatcher, types
+
+TOKEN = os.environ.get("BOT_TOKEN")
+TARGET_CHANNEL = os.environ.get("CHANNEL_ID")
+ADMIN_ID = int(os.environ.get("ADMIN_ID", 0))
+
+bot = Bot(token=TOKEN)
+dp = Dispatcher()
+
+@dp.message()
+async def forward_to_channel(message: types.Message):
+    if message.from_user.id != ADMIN_ID:
+        return
+    try:
+        await bot.copy_message(
+            chat_id=TARGET_CHANNEL,
+            from_chat_id=message.chat.id,
+            message_id=message.message_id
+        )
+        await message.reply("✅ ارسال شد!")
+    except Exception as e:
+        await message.reply(f"❌ خطا: {e}")
+
+async def main():
+    await dp.start_polling(bot)
+
+if __name__ == "__main__":
+    asyncio.run(main())
